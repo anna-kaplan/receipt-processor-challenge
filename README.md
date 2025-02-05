@@ -226,11 +226,23 @@ Receipt data is processed into a Python dictionary as follows:
     ```bash
     docker build -t receipt-processor .
     ```
+    or
+    ```bash
+    docker build --no-cache -t receipt-processor .
+    ```
 
 3.  Run the container (container port 5000 is mapped to port 5000 on the local machine):
 
     ```bash
     docker run --name receipt-processor -p 5000:5000 receipt-processor
+    ```
+
+4.  To clean up docker: gracefully stop and
+
+    ```bash
+    docker stop receipt-processor
+    docker container rm receipt-processor
+    docker image rm receipt-processor
     ```
 
 ## Querying receipt-processor:
