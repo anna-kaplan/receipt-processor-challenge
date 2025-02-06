@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, json, Response
 from flask_expects_json import expects_json
 import uuid
 import math
@@ -9,6 +9,7 @@ import logging
 from config import Config
 
 app = Flask(__name__)
+
 logging.basicConfig(level=logging.INFO)
 
 DATE_FORMAT = '%Y-%m-%d'
@@ -42,6 +43,24 @@ request_schema = {
     'required': ['retailer', 'purchaseDate', 'purchaseTime', 'total', 'items']
 }
 
+
+def api_response(status_code, data=None, error_message=None, exception_message=None):
+    response_data = data or {}
+    if error_message:
+        response_data['error'] = error_message
+    if exception_message:
+        response_data['message'] = exception_message
+    resp = Response(json.dumps(response_data), mimetype='application/json')
+    resp.status_code = status_code
+
+    return resp
+
+
+@app.errorhandler(400)
+def bad_request(error):
+    return api_response(400, error_message='The receipt is invalid', exception_message=str(error))
+
+
 receipt_storage = {}  # storage of processed receipts
 
 
@@ -59,20 +78,20 @@ def process_receipt():
         save_receipt(receipt_id, receipt)
         logging.info(f'Processed receipt, id={receipt_id}')
 
-        return jsonify({'id': receipt_id}), 200
+        return api_response(200, data={'id': receipt_id})
     except Exception as e:
-        message = f'An error occured during receipt processing - {e}'
-        logging.error(message)
-        return jsonify({'message': message}), 500
+        error_message = f'An error occured during receipt processing'
+        logging.error(error_message)
+        return api_response(500, error_message=error_message, exception_message=str(e))
 
 
 @app.route('/receipts/<receipt_id>/points', methods=['GET'])
 def get_points(receipt_id):
     receipt = receipt_storage.get(receipt_id)
     if receipt:
-        return jsonify({'points': receipt['points']}), 200
-    else:
-        return jsonify({'message': f'No receipt found with ID={receipt_id}'}), 404
+        return api_response(200, data={'points': receipt['points']})
+
+    return api_response(404, error_message='No receipt found for that ID.')
 
 
 def get_new_receipt_id():

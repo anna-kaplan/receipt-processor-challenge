@@ -237,7 +237,7 @@ Receipt data is processed into a Python dictionary as follows:
     docker run --name receipt-processor -p 5000:5000 receipt-processor
     ```
 
-4.  To clean up docker: gracefully stop and
+4.  To clean up docker after tests below are done: gracefully stop process and remove container and image
 
     ```bash
     docker stop receipt-processor

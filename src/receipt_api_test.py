@@ -113,8 +113,8 @@ class ReceiptProcessingTests(unittest.TestCase):
         response = self.app.get('/receipts/invalid_id/points')
         self.assertEqual(response.status_code, 404)
         data = json.loads(response.data)
-        self.assertIn('message', data)
-        self.assertEqual(data['message'], 'No receipt found with ID=invalid_id')
+        self.assertIn('error', data)
+        self.assertEqual(data['error'], 'No receipt found for that ID.')
 
 
 if __name__ == '__main__':
